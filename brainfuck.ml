@@ -15,48 +15,58 @@
  * ,    Reads char and stores ASCII under ptr
  *)
 
-let execute ?(array_size=30000) code putchar getchar =
+exception Error of string
+
+let execute ?(array_size=30000) ?(loops_limit=1000000) code putchar getchar =
   let a = Array.make array_size 0 in
   let rec skip_loop deep i =
     if i < String.length code then
       match code.[i] with
-        | '[' -> skip_loop (deep+1) (i+1)
-        | ']' -> if deep = 0 then i else skip_loop (deep-1) (i+1)
-        | _ -> skip_loop deep (i+1)
+        | '[' -> skip_loop (succ deep) (succ i)
+        | ']' -> if deep = 0 then i else skip_loop (pred deep) (succ i)
+        | _ -> skip_loop deep (succ i)
     else
       i
   in
-  let rec aux_loop pointer i =
+  let rec aux_loop looping iters pointer i =
     if i < String.length code then
       match code.[i] with
         | '>' ->
-            aux_loop (pointer + 1) (i+1)
+            aux_loop looping iters (succ pointer) (succ i)
         | '<' ->
-            aux_loop (pointer - 1) (i+1)
+            aux_loop looping iters (pred pointer) (succ i)
         | '+' ->
-            a.(pointer) <- a.(pointer) + 1;
-            aux_loop pointer (i+1)
+            a.(pointer) <- succ a.(pointer);
+            aux_loop looping iters pointer (succ i)
         | '-' ->
-            a.(pointer) <- a.(pointer) - 1;
-            aux_loop pointer (i+1)
+            a.(pointer) <- pred a.(pointer);
+            aux_loop looping iters pointer (succ i)
         | '.' ->
             putchar (Char.chr a.(pointer));
-            aux_loop pointer (i+1)
+            aux_loop looping iters pointer (succ i)
         | ',' ->
             a.(pointer) <- Char.code (getchar ());
-            aux_loop pointer (i+1)
+            aux_loop looping iters pointer (succ i)
         | '[' ->
             if a.(pointer) <> 0 then
-              let newpointer = aux_loop pointer (i+1) in
-                aux_loop newpointer i
+              if iters < loops_limit then
+                let _, newpointer = aux_loop true iters pointer (succ i) in
+                  aux_loop looping (succ iters) newpointer i
+              else
+                raise (Error "Iteration limit exceed")
             else
-              let i = skip_loop 0 (i+1) in
-                aux_loop pointer (i+1)
+              let i = skip_loop 0 (succ i) in
+                aux_loop looping iters pointer (succ i)
         | ']' ->
-            pointer
+            if looping then
+              looping, pointer
+            else
+              raise (Error "Unmatched ]")
         | _ ->
-            aux_loop pointer (i+1)
+            aux_loop looping iters pointer (succ i)
     else
-      pointer
+      looping, pointer
   in
-    aux_loop 0 0
+  let looping, _ = aux_loop false 0 0 0 in
+    if looping then
+      raise (Error "Unmatched [")
