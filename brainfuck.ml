@@ -17,65 +17,75 @@
 
 exception Error of string
 
-let parse str =
+type code = int -> (int * int) list -> int -> int -> code array -> unit
+
+let execute ?(array_size=30000) ?(loops_limit=1000000)
+    str user_putchar user_getchar =
+  let a = Array.make array_size 0 in
+  let rec aux_loop (iters:int) (loops:(int * int) list) (pointer:int)
+      (i:int)
+      (code:code array) : unit =
+    if i < Array.length code then
+      code.(i) iters loops pointer i code
+    else
+      ()
+  and plus iters loops pointer i =
+    a.(pointer) <- succ a.(pointer);
+    aux_loop iters loops pointer (succ i)
+  and minus iters loops pointer i =
+    a.(pointer) <- pred a.(pointer);
+    aux_loop iters loops pointer (succ i)
+  and shift_left iters loops pointer i =
+    aux_loop iters loops (pred pointer) (succ i)
+  and shift_right iters loops pointer i =
+    aux_loop iters loops (succ pointer) (succ i)
+  and putchar iters loops pointer i =
+    user_putchar (Char.chr a.(pointer));
+    aux_loop iters loops pointer (succ i)
+  and getchar iters loops pointer i =
+    a.(pointer) <- Char.code (user_getchar ());
+    aux_loop iters loops pointer i
+  and start_loop iters loops pointer i =
+    if a.(pointer) <> 0 then
+      if iters < loops_limit then
+        aux_loop (pred iters) loops pointer (succ i)
+      else
+        raise (Error "Iteration limit exceed")
+    else
+      let (_, i) = List.hd loops in
+        aux_loop iters (List.tl loops) pointer i
+  and end_loop iters loops pointer i =
+    let (i, _) = List.hd loops in
+      aux_loop iters loops pointer i
+  and ign iters loops pointer i =
+    aux_loop iters loops pointer (succ i)
+  in
   let rec find_eparen deep i =
     if i < String.length str then
       match str.[i] with
-        | '[' -> find_eparen (succ deep) (succ i)
-        | ']' -> if deep = 0 then i else find_eparen (pred deep) (succ i)
+        | '[' -> find_eparen (succ deep) (succ i) 
+        | ']' -> if deep = 0 then succ i else find_eparen (pred deep) (succ i)
         | _ -> find_eparen deep (succ i)
     else
       raise (Error "Unmatched [")
   in
-  let rec aux_parse ps i =
+  let rec parse code loops i =
     if i < String.length str then
       match str.[i] with
+        | '+' -> parse (plus :: code) loops (succ i)
+        | '-' -> parse (minus :: code) loops (succ i)
+        | '<' -> parse (shift_left :: code) loops (succ i)
+        | '>' -> parse (shift_right :: code) loops (succ i)
+        | '.' -> parse (putchar :: code) loops (succ i)
+        | ',' -> parse (getchar :: code) loops (succ i)
         | '[' ->
             let eparen = find_eparen 0 (succ i) in
-              aux_parse ((i, eparen) :: ps) (succ i)
-        | _ -> aux_parse ps (succ i)
-    else
-      List.rev ps
-  in
-    aux_parse [] 0
-    
-let execute ?(array_size=30000) ?(loops_limit=1000000) code putchar getchar =
-  let a = Array.make array_size 0 in
-  let rec aux_loop ps iters pointer i =
-    if i < String.length code then
-      match code.[i] with
-        | '>' ->
-            aux_loop ps iters (succ pointer) (succ i)
-        | '<' ->
-            aux_loop ps iters (pred pointer) (succ i)
-        | '+' ->
-            a.(pointer) <- succ a.(pointer);
-            aux_loop ps iters pointer (succ i)
-        | '-' ->
-            a.(pointer) <- pred a.(pointer);
-            aux_loop ps iters pointer (succ i)
-        | '.' ->
-            putchar (Char.chr a.(pointer));
-            aux_loop ps iters pointer (succ i)
-        | ',' ->
-            a.(pointer) <- Char.code (getchar ());
-            aux_loop ps iters pointer (succ i)
-        | '[' ->
-            if a.(pointer) <> 0 then
-              if iters < loops_limit then
-                aux_loop ps iters pointer (succ i)
-              else
-                raise (Error "Iteration limit exceed")
-            else
-              let (_, i) = List.hd ps in
-                aux_loop (List.tl ps) iters pointer (succ i)
+              parse (start_loop :: code) ((i, eparen) :: loops) (succ i)
         | ']' ->
-            let (i, _) = List.hd ps in
-              aux_loop ps iters pointer i
-        | _ ->
-            aux_loop ps iters pointer (succ i)
+            parse (end_loop :: code) loops (succ i)
+        | _ -> parse (ign::code) loops (succ i)
     else
-      ()
+      Array.of_list (List.rev code), List.rev loops
   in
-  let ps = parse code in
-    aux_loop ps 0 0 0
+  let code, loops = parse [] [] 0 in
+    aux_loop 0 loops 0 0 code
