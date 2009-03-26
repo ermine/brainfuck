@@ -17,74 +17,78 @@
 
 exception Error of string
 
-type code = int -> (int * int) list -> int -> int -> code array -> unit
-
-let execute ?(array_size=30000) ?(loops_limit=1000000)
+let execute ?(array_size=30000) ?(loops_limit=10000000)
     str user_putchar user_getchar =
   let a = Array.make array_size 0 in
-  let rec aux_loop (iters:int) (loops:(int * int) list) (pointer:int)
-      (i:int) (code:code array) =
+  let stub = (fun iters pointer i -> ()) in
+  let code = Array.make (String.length str) stub in
+  let rec aux_loop iters pointer i =
     if i < Array.length code then
-      code.(i) iters loops pointer i code
+      code.(i) iters pointer i
     else
       ()
-  and plus iters loops pointer i code =
+  and plus iters pointer i =
     a.(pointer) <- succ a.(pointer);
-    aux_loop iters loops pointer (succ i) code
-  and minus iters loops pointer i code =
+    aux_loop iters pointer (succ i)
+  and minus iters pointer i=
     a.(pointer) <- pred a.(pointer);
-    aux_loop iters loops pointer (succ i) code
-  and shift_left iters loops pointer i code =
-    aux_loop iters loops (pred pointer) (succ i) code
-  and shift_right iters loops pointer i code =
-    aux_loop iters loops (succ pointer) (succ i) code
-  and putchar iters loops pointer i code =
-    user_putchar (Char.chr a.(pointer));
-    aux_loop iters loops pointer (succ i) code
-  and getchar iters loops pointer i code =
-    a.(pointer) <- Char.code (user_getchar ());
-    aux_loop iters loops pointer i code
-  and start_loop iters loops pointer i code =
+    aux_loop iters pointer (succ i)
+  and shift_left iters pointer i=
+    aux_loop iters (pred pointer) (succ i)
+  and shift_right iters pointer i=
+    aux_loop iters (succ pointer) (succ i)
+  and putchar iters pointer i =
+    user_putchar a.(pointer);
+    aux_loop iters pointer (succ i)
+  and getchar iters pointer i =
+    a.(pointer) <- user_getchar ();
+    aux_loop iters pointer i
+  and start_loop jmp iters pointer i=
     if a.(pointer) <> 0 then
       if iters < loops_limit then
-        aux_loop (pred iters) loops pointer (succ i) code
+        aux_loop (succ iters) pointer (succ i)
       else
         raise (Error "Iteration limit exceed")
     else
-      let (_, i) = List.hd loops in
-        aux_loop iters (List.tl loops) pointer i code
-  and end_loop iters loops pointer i code =
-    let (i, _) = List.hd loops in
-      aux_loop iters loops pointer i code
-  and ign iters loops pointer i code =
-    aux_loop iters loops pointer (succ i) code
+      aux_loop iters pointer jmp
+  and end_loop jmp iters pointer i =
+    aux_loop iters pointer jmp
+  and ign iters pointer i =
+    aux_loop iters pointer (succ i)
   in
   let rec find_eparen deep i =
     if i < String.length str then
       match str.[i] with
         | '[' -> find_eparen (succ deep) (succ i) 
-        | ']' -> if deep = 0 then succ i else find_eparen (pred deep) (succ i)
+        | ']' -> if deep = 0 then i else find_eparen (pred deep) (succ i)
         | _ -> find_eparen deep (succ i)
     else
       raise (Error "Unmatched [")
   in
-  let rec parse code loops i =
+  let rec parse i =
     if i < String.length str then
       match str.[i] with
-        | '+' -> parse (plus :: code) loops (succ i)
-        | '-' -> parse (minus :: code) loops (succ i)
-        | '<' -> parse (shift_left :: code) loops (succ i)
-        | '>' -> parse (shift_right :: code) loops (succ i)
-        | '.' -> parse (putchar :: code) loops (succ i)
-        | ',' -> parse (getchar :: code) loops (succ i)
+        | '+' -> code.(i) <- plus; parse (succ i)
+        | '-' -> code.(i) <- minus; parse (succ i)
+        | '<' -> code.(i) <- shift_left; parse (succ i)
+        | '>' -> code.(i) <- shift_right; parse (succ i)
+        | '.' -> code.(i) <- putchar; parse (succ i)
+        | ',' -> code.(i) <- getchar; parse (succ i)
         | '[' ->
             let eparen = find_eparen 0 (succ i) in
-              parse (start_loop :: code) ((i, eparen) :: loops) (succ i)
+              code.(i) <- start_loop (succ eparen);
+              code.(eparen) <- end_loop i;
+              parse (succ i)
         | ']' ->
-            parse (end_loop :: code) loops (succ i)
-        | _ -> parse (ign::code) loops (succ i)
+            (*
+            if code.(i) = stub then
+              raise (Error "Unmatched ]")
+            else
+            *)
+              parse (succ i)
+        | _ -> code.(i) <- ign; parse (succ i)
     else
-      Array.of_list (List.rev code), List.rev loops
+      ()
   in
-  let code, loops = parse [] [] 0 in
-    aux_loop 0 loops 0 0 code
+    parse 0;
+    aux_loop 0 0 0
