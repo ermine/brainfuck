@@ -56,39 +56,28 @@ let execute ?(array_size=30000) ?(loops_limit=10000000)
   and ign iters pointer i =
     aux_loop iters pointer (succ i)
   in
-  let rec find_eparen deep i =
+  let rec parse ps i =
     if i < String.length str then
       match str.[i] with
-        | '[' -> find_eparen (succ deep) (succ i) 
-        | ']' -> if deep = 0 then i else find_eparen (pred deep) (succ i)
-        | _ -> find_eparen deep (succ i)
-    else
-      raise (Error "Unmatched [")
-  in
-  let rec parse i =
-    if i < String.length str then
-      match str.[i] with
-        | '+' -> code.(i) <- plus; parse (succ i)
-        | '-' -> code.(i) <- minus; parse (succ i)
-        | '<' -> code.(i) <- shift_left; parse (succ i)
-        | '>' -> code.(i) <- shift_right; parse (succ i)
-        | '.' -> code.(i) <- putchar; parse (succ i)
-        | ',' -> code.(i) <- getchar; parse (succ i)
-        | '[' ->
-            let eparen = find_eparen 0 (succ i) in
-              code.(i) <- start_loop (succ eparen);
-              code.(eparen) <- end_loop i;
-              parse (succ i)
+        | '+' -> code.(i) <- plus; parse ps (succ i)
+        | '-' -> code.(i) <- minus; parse ps (succ i)
+        | '<' -> code.(i) <- shift_left; parse ps (succ i)
+        | '>' -> code.(i) <- shift_right; parse ps (succ i)
+        | '.' -> code.(i) <- putchar; parse ps (succ i)
+        | ',' -> code.(i) <- getchar; parse ps (succ i)
+        | '[' -> parse (i::ps) (succ i)
         | ']' ->
-            (*
-            if code.(i) = stub then
+            if ps = [] then
               raise (Error "Unmatched ]")
             else
-            *)
-              parse (succ i)
-        | _ -> code.(i) <- ign; parse (succ i)
+              let j = List.hd ps in
+                code.(j) <- start_loop (succ i);
+                code.(i) <- end_loop j;
+                parse (List.tl ps) (succ i)
+        | _ -> code.(i) <- ign; parse ps (succ i)
     else
-      ()
+      if ps <> [] then
+        raise (Error "Unmatched [")
   in
-    parse 0;
+    parse []  0;
     aux_loop 0 0 0
