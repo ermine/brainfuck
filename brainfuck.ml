@@ -20,7 +20,7 @@ exception Error of string
 let execute ?(array_size=30000) ?(loops_limit=10000000)
     str user_putchar user_getchar =
   let a = Array.make array_size 0 in
-  let stub = (fun iters pointer i -> ()) in
+  let stub = (fun _iters _pointer _i -> ()) in
   let code = Array.make (String.length str) stub in
   let rec aux_loop iters pointer i =
     if i < Array.length code then
@@ -51,7 +51,7 @@ let execute ?(array_size=30000) ?(loops_limit=10000000)
         raise (Error "Iteration limit exceed")
     else
       aux_loop iters pointer jmp
-  and end_loop jmp iters pointer i =
+  and end_loop jmp iters pointer _i =
     aux_loop iters pointer jmp
   and ign iters pointer i =
     aux_loop iters pointer (succ i)
