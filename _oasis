@@ -1,0 +1,26 @@
+OASISFormat: 0.2
+Name:        brainfuck
+Version:     0.1
+Synopsis:    Brainfuck interpretator
+Authors:     Anastasia Gornostaeva
+License:     BSD3
+LicenseFile: LICENCE
+Plugins:     DevFiles (0.2), META (0.2), StdFiles (0.2)
+BuildTools:  ocamlbuild
+
+Library brainfuck
+  Path:       .
+  Modules:    Brainfuck
+
+Executable test
+  Path:       .
+  Install:    false
+  CompiledObject: best
+  MainIs: test.ml
+  BuildDepends: brainfuck
+
+SourceRepository github
+  Type:     git
+  Location: git://github.com/ermine/brainfuck.git
+  Browser:  https://github.com/ermine/brainfuck
+  

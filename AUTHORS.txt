@@ -1,0 +1,5 @@
+(* OASIS_START *)
+(* DO NOT EDIT (digest: efdb92b399232fb9fa91744b9f1898ff) *)
+Authors of brainfuck
+Anastasia Gornostaeva
+(* OASIS_STOP *)

@@ -1,0 +1,9 @@
+# OASIS_START
+# DO NOT EDIT (digest: b49226dbddb0c8c73820c01a806f9db9)
+version = "0.1"
+description = "Brainfuck interpretator"
+archive(byte) = "brainfuck.cma"
+archive(native) = "brainfuck.cmxa"
+exists_if = "brainfuck.cma"
+# OASIS_STOP
+
