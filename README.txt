@@ -1,6 +1,6 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: a5e59dca1e365ebbb641b50d81c0746f) *)
-This is the README file for the brainfuck distribution.
+(* DO NOT EDIT (digest: 7193d61696ef89501d3e4f9cc22a21eb) *)
+This is the README file for the erm_brainfuck distribution.
 
 Brainfuck interpretator
 

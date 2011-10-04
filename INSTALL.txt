@@ -1,6 +1,6 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 3c079795aa494e200b6d526e3aaab4d9) *)
-This is the INSTALL file for the brainfuck distribution.
+(* DO NOT EDIT (digest: 04b93bbe5d8748be68b70ab720d75f87) *)
+This is the INSTALL file for the erm_brainfuck distribution.
 
 This package uses OASIS to generate its build system. See section OASIS for
 full information. 

@@ -1,7 +1,7 @@
 # OASIS_START
-# DO NOT EDIT (digest: 7cb7718f9982670eb40c7e79385be5b3)
-# Library brainfuck
+# DO NOT EDIT (digest: 299ecc3d5cbbe830744d20e3f3d41815)
+# Library erm_brainfuck
 # Executable test
-<test.{native,byte}>: use_brainfuck
-<*.ml{,i}>: use_brainfuck
+<test.{native,byte}>: use_erm_brainfuck
+<*.ml{,i}>: use_erm_brainfuck
 # OASIS_STOP

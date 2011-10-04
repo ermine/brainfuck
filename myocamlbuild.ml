@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 614db448ad37d4d0a2256ebbfa2f95fb) *)
+(* DO NOT EDIT (digest: 34be2c098847f69bd050b268ba97a725) *)
 module OASISGettext = struct
 # 21 "/usr/home/ermine/projects/ocaml/src/oasis/src/oasis/OASISGettext.ml"
   
@@ -450,8 +450,11 @@ end
 
 open Ocamlbuild_plugin;;
 let package_default =
-  {MyOCamlbuildBase.lib_ocaml = [("brainfuck", [])]; lib_c = []; flags = []; 
-  }
+  {
+     MyOCamlbuildBase.lib_ocaml = [("erm_brainfuck", [])];
+     lib_c = [];
+     flags = [];
+     }
   ;;
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;

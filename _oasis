@@ -1,5 +1,5 @@
 OASISFormat: 0.2
-Name:        brainfuck
+Name:        erm_brainfuck
 Version:     0.1
 Synopsis:    Brainfuck interpretator
 Authors:     Anastasia Gornostaeva
@@ -8,7 +8,7 @@ LicenseFile: LICENCE
 Plugins:     DevFiles (0.2), META (0.2), StdFiles (0.2)
 BuildTools:  ocamlbuild
 
-Library brainfuck
+Library erm_brainfuck
   Path:       .
   Modules:    Brainfuck
 
@@ -17,7 +17,7 @@ Executable test
   Install:    false
   CompiledObject: best
   MainIs: test.ml
-  BuildDepends: brainfuck
+  BuildDepends: erm_brainfuck
 
 SourceRepository github
   Type:     git
