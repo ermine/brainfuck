@@ -1,5 +1,5 @@
 (*
- * (c) 2009-2011 Anastasia Gornostaeva <ermine@ermine.pp.ru>
+ * (c) 2009-2011 Anastasia Gornostaeva
  *)
 
 (*
