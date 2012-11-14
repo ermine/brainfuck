@@ -1,9 +1,11 @@
 # OASIS_START
-# DO NOT EDIT (digest: 8f67c43c423e3dcc7386cfdda1949138)
+# DO NOT EDIT (digest: f3e0a1231f12d749e489bf0b892096ee)
 version = "0.1"
 description = "Brainfuck interpretator"
 archive(byte) = "erm_brainfuck.cma"
+archive(byte, plugin) = "erm_brainfuck.cma"
 archive(native) = "erm_brainfuck.cmxa"
+archive(native, plugin) = "erm_brainfuck.cmxs"
 exists_if = "erm_brainfuck.cma"
 # OASIS_STOP
 
